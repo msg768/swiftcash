@@ -1,5 +1,4 @@
-// Copyright (c) 2011-2015 The Bitcoin Core developers
-// Copyright (c) 2018 The Phore developers
+// Copyright (c) 2018 SwiftCash developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -9,6 +8,7 @@
 #include "guiutil.h"
 #include "proposaltablemodel.h"
 #include "columnalignedlayout.h"
+#include "checkboxbackground.h"
 #include <QWidget>
 #include <QKeyEvent>
 #include <QTimer>
@@ -50,15 +50,15 @@ public:
     };
 
     enum ColumnWidths {
-        PROPOSAL_COLUMN_WIDTH = 140,
-        AMOUNT_COLUMN_WIDTH = 120,		
+        PROPOSAL_COLUMN_WIDTH = 240,
+        AMOUNT_COLUMN_WIDTH = 120,
         START_DATE_COLUMN_WIDTH = 80,
         END_DATE_COLUMN_WIDTH = 80,
         YES_VOTES_COLUMN_WIDTH = 80,
-        NO_VOTES_COLUMN_WIDTH = 50,
-        ABSTAIN_COLUMN_WIDTH = 50,
+        NO_VOTES_COLUMN_WIDTH = 80,
+        ABSTAIN_COLUMN_WIDTH = 80,
         VOTES_NEEDED_COLUMN_WIDTH = 80,
-        MINIMUM_COLUMN_WIDTH = 23
+        MINIMUM_COLUMN_WIDTH = 25
     };
 
 private:
@@ -76,20 +76,14 @@ private:
     QLineEdit *noVotesWidget;
     QLineEdit *abstainVotesWidget;
     QLineEdit *amountWidget;
-    QLineEdit *votesNeededWidget;
+    QCheckBoxBackground *votesNeededWidget;
     QLabel *secondsLabel;
 
     QMenu *contextMenu;
-
-    //LineEdit *startDateRangeWidget;
     QLineEdit *proposalStartDate;
-
-    //QLineEdit *endDateRangeWidget;
     QLineEdit *proposalEndDate;
     ColumnAlignedLayout *hlayout;
 
-    //QWidget *createStartDateRangeWidget();
-    //QWidget *createEndDateRangeWidget();
     void vote_click_handler(const std::string voteString);
 
     GUIUtil::TableViewLastColumnResizingFixer *columnResizingFixer;
@@ -98,8 +92,6 @@ private:
 
 private Q_SLOTS:
     void contextualMenu(const QPoint &);
-    //void startDateRangeChanged();
-    //void endDateRangeChanged();
     void voteYes();
     void voteNo();
     void voteAbstain();
@@ -117,7 +109,7 @@ public Q_SLOTS:
     void changedYesVotes(const QString &minYesVotes);
     void changedNoVotes(const QString &minNoVotes);
     void changedAbstainVotes(const QString &minAbstainVotes);
-    void changedVotesNeeded(const QString &votesNeeded);
+    void changedVotesNeeded(int votesNeeded);
     void changedAmount(const QString &minAmount);
 
 };

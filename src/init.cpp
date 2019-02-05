@@ -2,7 +2,7 @@
 // Copyright (c) 2009-2014 Bitcoin developers
 // Copyright (c) 2014-2015 Dash developers
 // Copyright (c) 2015-2018 PIVX developers
-// Copyright (c) 2017-2017 SwiftCash developers
+// Copyright (c) 2018-2019 SwiftCash developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -237,7 +237,11 @@ void PrepareShutdown()
 #endif
 
 #ifndef WIN32
-    boost::filesystem::remove(GetPidFile());
+    try {
+        boost::filesystem::remove(GetPidFile());
+    } catch (const boost::filesystem::filesystem_error& e) {
+        LogPrintf("%s: Unable to remove pidfile: %s\n", __func__, e.what());
+    }
 #endif
     UnregisterAllValidationInterfaces();
 }
@@ -706,10 +710,8 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     sa_hup.sa_flags = 0;
     sigaction(SIGHUP, &sa_hup, NULL);
 
-#if defined(__SVR4) && defined(__sun)
-    // ignore SIGPIPE on Solaris
+    // Ignore SIGPIPE, otherwise it will bring the daemon down if the client closes unexpectedly
     signal(SIGPIPE, SIG_IGN);
-#endif
 #endif
 
     // ********************************************************* Step 2: parameter interactions

@@ -1,5 +1,4 @@
-// Copyright (c) 2011-2015 The Bitcoin Core developers
-// Copyright (c) 2018 The Phore developers
+// Copyright (c) 2018 SwiftCash developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -118,13 +117,11 @@ ProposalList::ProposalList(   QWidget *parent) :
     abstainVotesWidget->setObjectName("abstainVotesWidget");
     hlayout->addWidget(abstainVotesWidget);
 
-    votesNeededWidget = new QLineEdit(this);
+    votesNeededWidget = new QCheckBoxBackground(this);
     votesNeededWidget->setAttribute(Qt::WA_MacShowFocusRect, 0);
-#if QT_VERSION >= 0x040700
-    votesNeededWidget->setPlaceholderText(tr("Min votes needed"));
-#endif
-    votesNeededWidget->setValidator(new QIntValidator(-100, 100, this));
     votesNeededWidget->setObjectName("votesNeededWidget");
+    votesNeededWidget->setAlignment(Qt::AlignCenter);
+    votesNeededWidget->setContentsMargins(0,0,0,0);
     hlayout->addWidget(votesNeededWidget);
 
     QVBoxLayout *vlayout = new QVBoxLayout(this);
@@ -145,19 +142,6 @@ ProposalList::ProposalList(   QWidget *parent) :
     labelOverviewHeaderLeft->setFont(fontHeaderLeft);
 
     horizontalLayout_Header->addWidget(labelOverviewHeaderLeft);
-    // QSpacerItem* horizontalSpacer_3 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-    // horizontalLayout_Header->addItem(horizontalSpacer_3);
-
-
-
-    QTableView *view = new QTableView(this);
-
-    //view->horizontalHeaderview->setDefaultAlignment(Qt::AlignLeft);
-
-    view->setShowGrid(false);
-    //view->setTextAlignment(Qt::AlignLeft);
-
-
     vlayout->addLayout(horizontalLayout_Header);
 
     QSpacerItem* verticalSpacer_3 = new QSpacerItem(20, 20, QSizePolicy::Minimum, QSizePolicy::Preferred);
@@ -165,8 +149,11 @@ ProposalList::ProposalList(   QWidget *parent) :
     vlayout->addLayout(hlayout);
     QSpacerItem* verticalSpacer_5 = new QSpacerItem(20, 20, QSizePolicy::Minimum, QSizePolicy::Preferred);
     vlayout->addItem(verticalSpacer_5);
+
+    QTableView *view = new QTableView(this);
     vlayout->addWidget(view);
     vlayout->setSpacing(0);
+
     int width = view->verticalScrollBar()->sizeHint().width();
     hlayout->addSpacing(width);
     hlayout->setTableColumnsToTrack(view->horizontalHeader());
@@ -206,7 +193,7 @@ ProposalList::ProposalList(   QWidget *parent) :
     QAction *voteYesAction = new QAction(tr("Vote yes"), this);
     QAction *voteAbstainAction = new QAction(tr("Vote abstain"), this);
     QAction *voteNoAction = new QAction(tr("Vote no"), this);
-    QAction *openUrlAction = new QAction(tr("Visit proposal website"), this);
+    QAction *openUrlAction = new QAction(tr("Visit proposal's website"), this);
 
     contextMenu = new QMenu(this);
     contextMenu->addAction(voteYesAction);
@@ -226,7 +213,7 @@ ProposalList::ProposalList(   QWidget *parent) :
     connect(noVotesWidget, SIGNAL(textChanged(QString)), this, SLOT(changedNoVotes(QString)));
     connect(abstainVotesWidget, SIGNAL(textChanged(QString)), this, SLOT(changedAbstainVotes(QString)));
     connect(amountWidget, SIGNAL(textChanged(QString)), this, SLOT(changedAmount(QString)));
-    connect(votesNeededWidget, SIGNAL(textChanged(QString)), this, SLOT(changedVotesNeeded(QString)));
+    connect(votesNeededWidget, SIGNAL(stateChanged(int)), this, SLOT(changedVotesNeeded(int)));
 
     connect(view, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(openProposalUrl()));
     connect(view, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(contextualMenu(QPoint)));
@@ -293,8 +280,6 @@ void ProposalList::refreshProposals(bool force) {
     secondsLabel->setText(tr("List will be updated in 0 second(s)"));
 }
 
-
-
 void ProposalList::changedAmount(const QString &minAmount)
 {
     if(!proposalProxyModel)
@@ -303,14 +288,12 @@ void ProposalList::changedAmount(const QString &minAmount)
     proposalProxyModel->setMinAmount(minAmount.toInt());
 }
 
-void ProposalList::changedVotesNeeded(const QString &votesNeeded)
+void ProposalList::changedVotesNeeded(int votesNeeded)
 {
     if(!proposalProxyModel)
         return;
 
-    int value = votesNeeded == "" ? 0 : votesNeeded.toInt();
-
-    proposalProxyModel->setVotesNeeded(value);
+    proposalProxyModel->setVotesNeeded(votesNeeded);
 }
 
 void ProposalList::changedProposal(const QString &proposal)
@@ -334,7 +317,7 @@ void ProposalList::chooseStartDate(const QString &startDate)
     if(!proposalProxyModel)
         return;
 
-    proposalProxyModel->setMinYesVotes(startDate.toInt());
+    proposalProxyModel->setProposalStart(startDate.toInt());
 }
 
 void ProposalList::chooseEndDate(const QString &endDate)
@@ -342,7 +325,7 @@ void ProposalList::chooseEndDate(const QString &endDate)
     if(!proposalProxyModel)
         return;
 
-    proposalProxyModel->setMinYesVotes(endDate.toInt());
+    proposalProxyModel->setProposalEnd(endDate.toInt());
 }
 
 void ProposalList::changedNoVotes(const QString &minNoVotes)
